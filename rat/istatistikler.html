@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ziyaretçi İstatistikleri</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .btn {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-primary {
+            background: #007bff;
+        }
+        .log-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .log-entry {
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+            transition: background 0.3s;
+        }
+        .log-entry:hover {
+            background: #f8f9fa;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .log-ip {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 16px;
+        }
+        .log-time {
+            color: #666;
+            font-size: 14px;
+        }
+        .log-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        .detail-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .no-logs {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        .refresh-info {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Ziyaretçi İstatistikleri</h1>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="total-visits">0</div>
+                <div>Toplam Ziyaret</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="today-visits">0</div>
+                <div>Bugünkü Ziyaret</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="unique-ips">0</div>
+                <div>Benzersiz IP</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="refreshLogs()">🔄 Yenile</button>
+            <button class="btn" onclick="downloadLogs()">📥 Rapor İndir</button>
+            <button class="btn" onclick="exportToEmail()">📧 Email Gönder</button>
+            <button class="btn btn-danger" onclick="clearLogs()">🗑️ Temizle</button>
+        </div>
+    </div>
+
+    <div class="log-container" id="log-container">
+        <div class="no-logs">
+            <h3>Henüz hiç ziyaretçi kaydı yok</h3>
+            <p>Paylaşım linkini kullandığınızda ziyaretçi bilgileri burada görünecek.</p>
+        </div>
+    </div>
+
+    <div class="refresh-info">
+        Sayfa otomatik olarak 30 saniyede bir yenilenir. Son yenileme: <span id="last-refresh"></span>
+    </div>
+
+    <script>
+        function loadLogs() {
+            const logs = JSON.parse(localStorage.getItem('visitor_data') || '[]');
+            const container = document.getElementById('log-container');
+            
+            if (logs.length === 0) {
+                container.innerHTML = `
+                    <div class="no-logs">
+                        <h3>Henüz hiç ziyaretçi kaydı yok</h3>
+                        <p>Paylaşım linkini kullandığınızda ziyaretçi bilgileri burada görünecek.</p>
+                        <p><strong>Paylaşım Linki:</strong> ${window.location.origin}/hediye_kazanma.html</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // İstatistikleri güncelle
+            updateStats(logs);
+
+            // Logları ters sırada göster (en yeni üstte)
+            const reversedLogs = [...logs].reverse();
+            
+            container.innerHTML = reversedLogs.map((log, index) => `
+                <div class="log-entry">
+                    <div class="log-header">
+                        <div class="log-ip">${log.ip || 'Bilinmiyor'}</div>
+                        <div class="log-time">${log.timestamp}</div>
+                    </div>
+                    <div class="log-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Konum:</div>
+                            ${log.city || 'Bilinmiyor'}, ${log.country || 'Bilinmiyor'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">ISP:</div>
+                            ${log.isp || 'Bilinmiyor'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Platform:</div>
+                            ${log.platform || 'Bilinmiyor'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Ekran:</div>
+                            ${log.screen || 'Bilinmiyor'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Dil:</div>
+                            ${log.language || 'Bilinmiyor'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Saat Dilimi:</div>
+                            ${log.timezone || 'Bilinmiyor'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Referrer:</div>
+                            ${log.referrer || 'Direkt erişim'}
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tarayıcı:</div>
+                            ${getBrowserName(log.userAgent)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(logs) {
+            const today = new Date().toDateString();
+            const todayLogs = logs.filter(log => new Date(log.timestamp).toDateString() === today);
+            const uniqueIPs = [...new Set(logs.map(log => log.ip))];
+
+            document.getElementById('total-visits').textContent = logs.length;
+            document.getElementById('today-visits').textContent = todayLogs.length;
+            document.getElementById('unique-ips').textContent = uniqueIPs.length;
+        }
+
+        function getBrowserName(userAgent) {
+            if (!userAgent) return 'Bilinmiyor';
+            
+            if (userAgent.includes('Chrome')) return 'Chrome';
+            if (userAgent.includes('Firefox')) return 'Firefox';
+            if (userAgent.includes('Safari')) return 'Safari';
+            if (userAgent.includes('Edge')) return 'Edge';
+            if (userAgent.includes('Opera')) return 'Opera';
+            return 'Diğer';
+        }
+
+        function refreshLogs() {
+            loadLogs();
+            document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('tr-TR');
+        }
+
+        function downloadLogs() {
+            const logs = JSON.parse(localStorage.getItem('visitor_data') || '[]');
+            
+            if (logs.length === 0) {
+                alert('İndirilecek ziyaretçi kaydı yok!');
+                return;
+            }
+
+            let logText = 'ZİYARETÇİ İSTATİSTİKLERİ\n';
+            logText += '========================\n';
+            logText += `Toplam Kayıt: ${logs.length}\n`;
+            logText += `İndirilme Tarihi: ${new Date().toLocaleString('tr-TR')}\n\n`;
+            
+            logs.forEach((log, index) => {
+                logText += `${index + 1}. ZİYARET\n`;
+                logText += `Zaman: ${log.timestamp}\n`;
+                logText += `IP Adresi: ${log.ip || 'Bilinmiyor'}\n`;
+                logText += `Konum: ${log.city || 'Bilinmiyor'}, ${log.country || 'Bilinmiyor'}\n`;
+                logText += `İnternet Sağlayıcısı: ${log.isp || 'Bilinmiyor'}\n`;
+                logText += `Platform: ${log.platform || 'Bilinmiyor'}\n`;
+                logText += `Ekran Çözünürlüğü: ${log.screen || 'Bilinmiyor'}\n`;
+                logText += `Dil: ${log.language || 'Bilinmiyor'}\n`;
+                logText += `Saat Dilimi: ${log.timezone || 'Bilinmiyor'}\n`;
+                logText += `Nereden Geldi: ${log.referrer || 'Direkt erişim'}\n`;
+                logText += `Tarayıcı Bilgisi: ${log.userAgent || 'Bilinmiyor'}\n`;
+                logText += `Ziyaret Edilen URL: ${log.url || 'Bilinmiyor'}\n`;
+                logText += '------------------------\n\n';
+            });
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(logText));
+            element.setAttribute('download', `ziyaretci_istatistikleri_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function exportToEmail() {
+            const logs = JSON.parse(localStorage.getItem('visitor_data') || '[]');
+            
+            if (logs.length === 0) {
+                alert('Gönderilecek ziyaretçi kaydı yok!');
+                return;
+            }
+
+            const subject = `Ziyaretçi İstatistikleri - ${new Date().toLocaleDateString('tr-TR')}`;
+            const body = `Ziyaretçi İstatistikleri (${logs.length} kayıt)\n\nDetaylar için ekteki dosyayı kontrol edin.`;
+            
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+        }
+
+        function clearLogs() {
+            if (confirm('Tüm ziyaretçi kayıtlarını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!')) {
+                localStorage.removeItem('visitor_data');
+                loadLogs();
+                alert('Tüm kayıtlar başarıyla silindi.');
+            }
+        }
+
+        // Sayfa yüklendiğinde logları yükle
+        window.onload = function() {
+            loadLogs();
+            document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('tr-TR');
+        };
+
+        // Otomatik yenileme (30 saniyede bir)
+        setInterval(refreshLogs, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+🌐 NGROK İLE GLOBAL LİNK OLUŞTURMA
+=====================================
+
+📥 ADIM 1: NGROK İNDİR
+- Site: https://ngrok.com
+- Kayıt ol (ücretsiz)
+- Windows için ngrok.exe indir
+- Bu klasöre kopyala
+
+🔧 ADIM 2: KURULUM
+1. ngrok.exe dosyasını bu klasöre koy
+2. Komut satırında: ngrok authtoken YOUR_TOKEN
+3. Token'i ngrok.com'dan al
+
+🚀 ADIM 3: SERVER BAŞLAT
+1. Bu klasörde komut satırı aç
+2. Şu komutu çalıştır:
+   ngrok http file://$(pwd) --host-header=localhost
+
+VEYA basit HTTP server için:
+   python -m http.server 8080
+   (başka terminalde) ngrok http 8080
+
+📱 ADIM 4: LİNK PAYLAŞ
+- Ngrok size https://abc123.ngrok.io gibi link verir
+- Bu linki paylaş: https://abc123.ngrok.io/hediye_kazanma.html
+- Admin: https://abc123.ngrok.io/istatistikler.html
+
+⚡ HIZLI BAŞLATMA:
+1. ngrok.exe'yi indir
+2. Komut: ngrok http file://$(pwd)
+3. Verilen linki kullan
+
+🔒 GÜVENLİK:
+- Ngrok linki herkese açık
+- Admin paneli linkini gizli tut
+- İşin bitince ngrok'u kapat
