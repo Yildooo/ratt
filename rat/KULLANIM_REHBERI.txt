@@ -1,0 +1,101 @@
+🎁 HEDİYE KAZANMA SİSTEMİ - KULLANIM REHBERİ
+=============================================
+
+📋 KURULUM ADIMLARI:
+===================
+
+1️⃣ PYTHON KURULUMU:
+   - https://python.org/downloads/ adresine git
+   - "Download Python" butonuna tıkla
+   - İndirilen dosyayı çalıştır
+   - ⚠️ ÖNEMLİ: "Add Python to PATH" kutucuğunu işaretle
+   - "Install Now" tıkla
+
+2️⃣ SİSTEMİ BAŞLATMA:
+   - "basla.bat" dosyasına çift tıkla
+   - VEYA komut satırında: python server.py
+   - Windows Firewall uyarısı çıkarsa "Allow" seç
+
+🔗 LİNKLER:
+===========
+
+📱 PAYLAŞIM LİNKİ (Bu linki paylaş):
+   http://192.168.1.XXX:8080/hediye_kazanma.html
+
+📊 ADMİN PANELİ (Sadece sen kullan):
+   http://localhost:8080/istatistikler.html
+
+🎯 KULLANIM:
+============
+
+1. Server'ı başlat (basla.bat)
+2. Paylaşım linkini kopyala
+3. WhatsApp, Telegram vs. ile paylaş
+4. Admin paneli ile IP'leri kontrol et
+5. "Rapor İndir" ile logları indir
+
+📱 TELEFON BAĞLANTISI:
+=====================
+
+Aynı WiFi ağında olan telefonlar linke erişebilir:
+- Bilgisayar ve telefon aynı WiFi'de olmalı
+- Server çalışırken linkler aktif
+- Server kapanınca linkler çalışmaz
+
+📄 LOG DOSYALARI:
+================
+
+- visitor_logs.json: Server logları
+- localStorage: Tarayıcı logları
+- İndirilen .txt dosyaları: Manuel raporlar
+
+🔒 GÜVENLİK:
+============
+
+✅ Güvenli:
+- Sadece aynı WiFi ağındaki cihazlar erişebilir
+- Veriler bilgisayarında saklanır
+- İstediğin zaman durdurabilirsin
+
+⚠️ Dikkat:
+- Admin paneli linkini paylaşma
+- Server'ı kapatmayı unutma
+- Logları düzenli temizle
+
+🛠️ SORUN GİDERME:
+=================
+
+❌ "Python bulunamadı" hatası:
+   → Python'u yeniden kur, PATH'e eklemeyi unutma
+
+❌ "Port kullanımda" hatası:
+   → Başka program 8080 portunu kullanıyor
+   → server.py'de PORT = 8081 yap
+
+❌ Telefon bağlanamıyor:
+   → Aynı WiFi ağında olduğunuzdan emin ol
+   → Windows Firewall'u kontrol et
+   → IP adresini doğru kopyaladığından emin ol
+
+❌ Admin paneli açılmıyor:
+   → Server çalışıyor mu kontrol et
+   → http://localhost:8080/istatistikler.html linkini dene
+
+📞 DESTEK:
+==========
+
+Sorun yaşarsan:
+1. Hata mesajını not al
+2. Hangi adımda takıldığını belirt
+3. Ekran görüntüsü al
+
+🎉 BAŞARILI KULLANIM:
+====================
+
+✅ Server başladı
+✅ Admin paneli açıldı  
+✅ Paylaşım linki çalışıyor
+✅ IP'ler kaydediliyor
+✅ Loglar indiriliyor
+
+Artık sisteminiz hazır! 🚀

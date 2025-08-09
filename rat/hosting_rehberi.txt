@@ -1,0 +1,48 @@
+🌐 ÜCRETSİZ HOSTİNG REHBERİ
+================================
+
+📁 YÜKLENECEK DOSYALAR:
+- hediye_kazanma.html (ana link)
+- istatistikler.html (admin panel)
+
+🔗 ÜCRETSİZ HOSTİNG SİTELERİ:
+
+1. 📊 NETLIFY (Önerilen)
+   - Site: https://netlify.com
+   - Kayıt ol → Drag & Drop ile dosyaları sürükle
+   - Otomatik link verir: https://random-name.netlify.app
+
+2. 🚀 VERCEL
+   - Site: https://vercel.com
+   - GitHub ile giriş yap
+   - Dosyaları yükle → Deploy
+
+3. 📱 GITHUB PAGES
+   - Site: https://github.com
+   - Yeni repo oluştur → Dosyaları yükle
+   - Settings → Pages → Enable
+   - Link: https://username.github.io/repo-name
+
+4. 🌟 SURGE.SH
+   - Site: https://surge.sh
+   - Terminal: npm install -g surge
+   - surge komutu ile yükle
+
+5. 📂 FIREBASE HOSTING
+   - Site: https://firebase.google.com
+   - Console → New Project → Hosting
+   - Firebase CLI ile deploy
+
+🎯 KULLANIM:
+1. Dosyaları hosting sitesine yükle
+2. Verilen linki paylaş
+3. Admin paneli: yourlink.com/istatistikler.html
+
+⚠️ DİKKAT:
+- Netlify en kolay ve güvenilir
+- GitHub Pages herkese açık olur
+- Vercel hızlı ve güvenilir
+
+🔒 GÜVENLİK:
+- Admin paneli linkini kimseyle paylaşma
+- Sadece hediye_kazanma.html linkini paylaş
